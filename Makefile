@@ -1,15 +1,12 @@
-CFLAGS?=-O2 -g -Wall
-LDLIBS+= -lpthread -lm -lmirsdrapi-rsp
-CC?=gcc
-PROGNAME=play_sdr
+CC=gcc
+###CFLAGS=-O -Wall
+CFLAGS=-g -Wall -Wl,-rpath=/usr/local/lib
+LDLIBS=-lsdrplay_api
 
-all: play_sdr
+all: sdrplay_api_example
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
-
-play_sdr: play_sdr.o
-	$(CC) -g -o play_sdr play_sdr.o $(LDFLAGS) $(LDLIBS)
+run: sdrplay_api_example
+	./sdrplay_api_example
 
 clean:
-	rm -f *.o play_sdr
+	rm -f *.o sdrplay_api_example

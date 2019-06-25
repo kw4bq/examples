@@ -1,12 +1,13 @@
-This repository has some example code to show what can be done with
-the RSP. No warranty is given with any of this code and it is
-provided as is.
+Forked from sdrplay/examples
+Removed Windows api calls
 
-play_sdr has been updated to use the new API functions and added support
-for RSP1 and RSP2. Also it now supports both 8 and 16 bit output.
+Build:
+Install SDRplay Linux API via https://www.sdrplay.com/linuxdl.php
+make
+./sdrplay_api_example
 
-sdrplay_api_example.c has been added as an example - it's for the new
-service based API (3.0)
+Ref:
+https://www.sdrplay.com/docs/SDRplay_API_Specification_v3.01.pdf
 
-If you would like to make contributions to this area, please send an
-email to software@sdrplay.com
+Notes:
+Linux build tips from fventuri https://www.sdrplay.com/community/viewtopic.php?f=9&t=4000

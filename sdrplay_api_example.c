@@ -1,9 +1,11 @@
 // sdrplay_api_sample_app.c : Simple console application showing the used of the sdrplay_api
 //
 
-#include <Windows.h>
 #include <stdio.h>
-#include <conio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "sdrplay_api.h"
 
@@ -163,7 +165,7 @@ int main(int argc, char *argv[])
             printf("sdrplay_api_GetDevices failed %s\n", sdrplay_api_GetErrorString(err));
             goto UnlockDeviceAndCloseApi;
         }
-        printf("MaxDevs=%d NumDevs=%d\n", sizeof(devs) / sizeof(sdrplay_api_DeviceT), ndev);
+        printf("MaxDevs=%ld NumDevs=%d\n", sizeof(devs) / sizeof(sdrplay_api_DeviceT), ndev);
         if (ndev > 0)
         {
             for (i = 0; i < (int)ndev; i++)
@@ -308,7 +310,7 @@ int main(int argc, char *argv[])
                 {
                     while(1)
                     {
-                        Sleep(1000);
+                        sleep(1);
                         if (masterInitialised) // Keep polling flag set in event callback until the master is initialised
                         {
                             // Redo call - should succeed this time
@@ -327,11 +329,22 @@ int main(int argc, char *argv[])
                 }
             }
 
+	    // use select() and getchar() to get keyboard presses in Linux
+            fd_set stdinfds;
+            FD_ZERO(&stdinfds);
+            FD_SET(0, &stdinfds);
+            struct termios termio;
+            tcgetattr(0, &termio);
+            struct termios otermio = termio;
+            termio.c_lflag &= ~(ICANON | ECHO);
+            tcsetattr(0, TCSANOW, &termio);
+
             while (1) // Small loop allowing user to control gain reduction in +/-1dB steps using keyboard keys
             {
-                if (_kbhit())
+		fd_set rfds = stdinfds;
+                if (select(1, &rfds, NULL, NULL, NULL) > 0)
                 {
-                    c = _getch();
+                    c = getchar();
                     if (c == 'q')
                     {
                         break;
@@ -361,8 +374,9 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
-                Sleep(100);
+		// Sleep(100);
             }
+	    tcsetattr(0, TCSANOW, &otermio);
 
             // Finished with device so uninitialise it
             if ((err = sdrplay_api_Uninit(chosenDevice->dev)) != sdrplay_api_Success)
@@ -372,7 +386,7 @@ int main(int argc, char *argv[])
                 {
                     while(1)
                     {
-                        Sleep(1000);
+                        sleep(1);
                         if (slaveUninitialised) // Keep polling flag set in event callback until the slave is uninitialised
                         {
                             // Repeat call - should succeed this time
